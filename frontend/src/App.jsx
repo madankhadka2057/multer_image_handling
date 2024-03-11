@@ -1,56 +1,52 @@
-
-import { useState } from 'react'
-import './App.css'
+import { useState } from 'react';
 import axios from 'axios';
+import "./App.css"
 function App() {
-  const [image,setImage]=useState({
-    image:""
-  })
-  const handleChange=(e)=>{
-    // setImage(e.target.files[0])
-      console.log(e.target.files)
-      const {name,files}=e.target
-      setImage({
-        ...image,
-        [name]:files[0]
-      })
-  }
-  const handleSubmit=async(e)=>{
-    e.preventDefault()
+  const [images, setImages] = useState([]); // State to hold the selected files
 
-    // const formData = new FormData()
-    // formData.append('image', image);
-   const data= await axios.post('http://localhost:3000/upload_file',image,{
-    headers: {
-      'Content-Type': 'multipart/form-data'
+  const handleChange = (e) => {
+    setImages(e.target.files); // Update state with the selected files
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!images || images.length === 0) {
+      console.log('No files selected');
+      return;
     }
-    
-    }) .then(response => {
-      console.log(response); // handle response data
-    })
-    .catch(error => {
-      console.error('Error:', error.response.data);
-    });
-    console.log(data)
-  }
 
-  
+   const formData = new FormData();
+   for (let i = 0; i < images.length; i++) {
+     formData.append('images', images[i]); // Append each file to FormData
+     
+    }
+    console.log(images)
+    console.log(...formData)
+
+    try {
+      const response = await axios.post('http://localhost:3000/upload_files', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      console.log(response.data); // Handle response data
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   return (
-    <>
-      <title>File Upload htmlForm</title>
-        <body>
-        <div className="container">
-            <form  onSubmit={handleSubmit} encType="multipart/form-data">
-                <div className="htmlForm-group">
-                    <label htmlFor="file">Choose File:</label>
-                    <input onChange={handleChange} type="file" id="image" name="image" />
-                </div>
-                <button type='submit' className="btn-submit">Upload</button>
-            </form>
+    <div className="container">
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <div className="form-group">
+          <label htmlFor="file">Choose Files:</label>
+          <input onChange={handleChange} type="file" id="images" name="images" multiple />
         </div>
-        </body>
-    </>
-  )
+        <button type='submit' className="btn-submit">Upload</button>
+      </form>
+    </div>
+  );
 }
 
-export default App
+export default App;
